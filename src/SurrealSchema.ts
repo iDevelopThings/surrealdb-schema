@@ -1,6 +1,7 @@
 import {DbInfoResponse, DbTableResponse, DbResponseResult, DbInfo, TableInfo} from "./DatabaseTypes";
 import {Schema} from "./Schema";
 import {SchemaParser} from "./SchemaParser";
+import {SchemaField} from "./SchemaField";
 
 export type SurrealDbConfig = {
 	namespace: string;
@@ -70,7 +71,7 @@ export class SurrealSchema {
 		return info.map(DbTableResponse.fromJson);
 	}
 
-	public async getSchema(): Promise<Schema> {
+	public async getSchema(options: GetSchemaConfig = {}): Promise<Schema> {
 		const dbInfo     = await this.getDbInfo();
 		const tablesInfo = await this.getTablesInfo(dbInfo.getTableNames());
 
@@ -78,6 +79,10 @@ export class SurrealSchema {
 
 		for (let tableName in dbInfo.tables) {
 			schema.tables[tableName] = SchemaParser.parseTable(dbInfo.tables[tableName]);
+
+			if (options?.generateId) {
+				schema.tables[tableName].fields.id = SchemaField.createForIdField();
+			}
 		}
 
 		for (let tableInfo of tablesInfo) {
@@ -107,9 +112,15 @@ export class SurrealSchema {
 			}
 		}
 
+
+
 		this.schema = schema;
 
 		return schema;
 	}
 
+}
+
+export type GetSchemaConfig = {
+	generateId?: boolean;
 }

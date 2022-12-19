@@ -54,6 +54,14 @@ describe("SurrealSchema", () => {
 		expect(info.tables.profile).toBeDefined();
 	});
 
+	it("can get schema with generated id field", async () => {
+		const schema = getInstance();
+		const info   = await schema.getSchema({generateId : true});
+
+		expect(info).toBeDefined();
+		expect(Object.values(info.tables).every(f => f.fields.id !== undefined)).toBeTruthy();
+	});
+
 	it("can generate original schema", async () => {
 		const schema     = getInstance();
 		const info       = await schema.getSchema();
@@ -68,5 +76,4 @@ describe("SurrealSchema", () => {
 
 
 	});
-
 });

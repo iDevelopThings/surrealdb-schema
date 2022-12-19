@@ -46,7 +46,9 @@ export class SchemaTable implements ISchemaTable {
 	public getFullSchema(): string {
 		const schema = [
 			this.originalString + ";",
-			this.getFields().map(field => field.originalString + ";"),
+			this.getFields()
+				.filter(field => field.originalString)
+				.map(field => field.originalString + ";"),
 		];
 
 		return schema.flat().join("\r\n");

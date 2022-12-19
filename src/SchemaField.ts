@@ -26,11 +26,18 @@ export class SchemaField implements ISchemaField {
 	public record: string;
 	public assert: string;
 
-	public child: SchemaField = null;
+	public child: SchemaField    = null;
 	public isArrayChild: boolean = false;
 
 	public finalize() {
 		this.title = toTitleCase(this.name);
 	}
 
+	public static createForIdField() {
+		const field = new SchemaField();
+		field.name  = "id";
+		field.title = "ID";
+		field.type  = "id";
+		return field;
+	}
 }

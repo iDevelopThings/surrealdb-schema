@@ -1,0 +1,45 @@
+{
+  "name": "surrealdb.schema",
+  "description": "Parse your surrealdb schema from the db api",
+  "author": {
+    "name": "iDevelopThings",
+    "url": "https://github.com/idevelopthings"
+  },
+
+  "readme": "readme.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/idevelopthings/surrealdb-schema"
+  },
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0",
+    "vite-plugin-dts": "^1.7.1",
+    "vitest": "^0.26.0"
+  }
+}

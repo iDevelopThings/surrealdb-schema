@@ -106,21 +106,66 @@ export class SurrealSchema {
 					);
 
 					if (childField) {
-						field.child = childField;
+						field.children.push(childField);
+					}
+				}
+
+				if (options?.handleNestedObjects) {
+					if (!field.isObjectPath && field.type == "object") {
+
+						const childFields = Object.values(table.fields).filter(
+							f => f.isObjectPath && f.name.includes(field.name + ".")
+						);
+
+						if (childFields.length) {
+							childFields.sort((a, b) => a.name.length - b.name.length);
+
+							let currentField  = field;
+							let previousChild = null;
+
+							for (let childField of childFields) {
+								const parts = childField.name.split(".");
+								const path  = parts.slice(0, parts.length - 1).join(".");
+
+								if (path == currentField.name || path == previousChild.name) {
+									previousChild  = childField;
+									const newChild = SchemaField.createNewChild(childField, parts[parts.length - 1]);
+
+									currentField.children.push(newChild);
+
+									if(options?.deleteOriginalNestedObjectFields) {
+										delete table.fields[childField.name];
+									}
+
+									currentField = newChild;
+								}
+							}
+
+						}
 					}
 				}
 			}
+
+
+
+			this.schema = schema;
+
+			return schema;
 		}
-
-
-
-		this.schema = schema;
-
-		return schema;
 	}
 
 }
 
 export type GetSchemaConfig = {
+	// When set to true, the schema will generate an ID field for each table
+	// This can be useful depending on the case, surreal doesn't include id fields by default
 	generateId?: boolean;
+
+	// When set to true, we'll process nested object paths(which are usually defined as separate fields)
+	// and nest them into the parent object
+	handleNestedObjects?: boolean;
+
+	// When paired with the above option, this will delete all of the original fields
+	// Meaning, to find children of an object, you'll have to go through the parent object -> children -> etc
+	deleteOriginalNestedObjectFields?: boolean
 }

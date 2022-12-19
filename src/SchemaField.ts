@@ -8,9 +8,11 @@ interface ISchemaField {
 	type: string;
 	record: string;
 	assert: string;
-	child: SchemaField;
+	children: SchemaField[];
 	isArrayChild: boolean;
+	isObjectPath: boolean;
 	finalize(): void;
+	hasChildren(): boolean;
 }
 
 export class SchemaField implements ISchemaField {
@@ -26,11 +28,17 @@ export class SchemaField implements ISchemaField {
 	public record: string;
 	public assert: string;
 
-	public child: SchemaField    = null;
+	public children: SchemaField[] = [];
+
 	public isArrayChild: boolean = false;
+	public isObjectPath: boolean = false;
 
 	public finalize() {
 		this.title = toTitleCase(this.name);
+	}
+
+	public hasChildren() {
+		return this.children.length > 0;
 	}
 
 	public static createForIdField() {
@@ -40,4 +48,21 @@ export class SchemaField implements ISchemaField {
 		field.type  = "id";
 		return field;
 	}
+
+	public static createNewChild(original: SchemaField, name: string) {
+		const field          = new SchemaField();
+		field.originalString = original.originalString;
+		field.name           = name;
+		field.table          = original.table;
+		field.type           = original.type;
+		field.record         = original.record;
+		field.assert         = original.assert;
+		field.children       = original.children;
+		field.isArrayChild   = original.isArrayChild;
+		field.isObjectPath   = original.isObjectPath;
+		field.finalize();
+
+		return field;
+	}
+
 }

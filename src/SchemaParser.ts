@@ -72,6 +72,10 @@ export class SchemaParser {
 			field.isArrayChild = true;
 		}
 
+		if (field.name.includes(".")) {
+			field.isObjectPath = true;
+		}
+
 		if (this.tokens.length >= 6) {
 			const fieldType = this.tokens[6];
 			field.type      = fieldType;

@@ -54,6 +54,35 @@ describe("SurrealSchema", () => {
 		expect(info.tables.profile).toBeDefined();
 	});
 
+	it("can get schema with nested object path fields", async () => {
+		const schema = getInstance();
+		const info   = await schema.getSchema({handleNestedObjects : true});
+
+		expect(info).toBeDefined();
+
+		const parent = info.tables.account.getField("subThing");
+		expect(parent).toBeDefined();
+		expect(parent.type).toBe("object");
+		expect(parent.children.length).toBe(1);
+		expect(parent.children[0].children.length).toBe(1);
+	});
+
+	it("can get schema with nested object path fields & delete originals", async () => {
+		const schema = getInstance();
+		const info   = await schema.getSchema({handleNestedObjects : true, deleteOriginalNestedObjectFields : true});
+
+		expect(info).toBeDefined();
+
+		const parent = info.tables.account.getField("subThing");
+		expect(parent).toBeDefined();
+		expect(parent.type).toBe("object");
+		expect(parent.children.length).toBe(1);
+		expect(parent.children[0].children.length).toBe(1);
+
+		expect(info.tables.account.getField("subThing.data")).toBeUndefined();
+		expect(info.tables.account.getField("subThing.data.key")).toBeUndefined();
+	});
+
 	it("can get schema with generated id field", async () => {
 		const schema = getInstance();
 		const info   = await schema.getSchema({generateId : true});

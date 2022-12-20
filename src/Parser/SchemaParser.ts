@@ -1,5 +1,6 @@
-import {SchemaField} from "./SchemaField";
-import {SchemaTable} from "./SchemaTable";
+import {SchemaField} from "../SchemaField";
+import {SchemaTable} from "../SchemaTable";
+import {FieldParser} from "./FieldParser";
 
 export enum DefinedType {
 	Field, Table
@@ -115,7 +116,10 @@ export class SchemaParser {
 			throw new Error("Invalid call to parseField: " + line);
 		}
 
-		return parser.parseSchemaField();
+		const fieldParser = new FieldParser(parser.tokens, parser.line, parser.lineTrimmed);
+
+		return fieldParser.parse();
+//		return parser.parseSchemaField();
 	}
 
 	public static parseTable(line: string): SchemaTable {

@@ -1,3 +1,21 @@
+export enum DatabaseFieldTypes {
+	ANY      = "any",
+	ARRAY    = "array",
+	BOOL     = "bool",
+	DATETIME = "datetime",
+	DECIMAL  = "decimal",
+	DURATION = "duration",
+	FLOAT    = "float",
+	INT      = "int",
+	NUMBER   = "number",
+	OBJECT   = "object",
+	STRING   = "string",
+	RECORD   = "record",
+	GEOMETRY = "geometry",
+}
+
+
+
 export type DbResponse<T> = T[];
 
 export type DbResponseResult<T> = {

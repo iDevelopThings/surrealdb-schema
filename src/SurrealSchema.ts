@@ -1,7 +1,7 @@
 import {DbInfoResponse, DbTableResponse, DbResponseResult, DbInfo, TableInfo} from "./DatabaseTypes";
 import {Schema} from "./Schema";
-import {SchemaParser} from "./SchemaParser";
 import {SchemaField} from "./SchemaField";
+import {SchemaParser} from "./Parser/SchemaParser";
 
 export type SurrealDbConfig = {
 	namespace: string;
@@ -145,13 +145,11 @@ export class SurrealSchema {
 					}
 				}
 			}
-
-
-
-			this.schema = schema;
-
-			return schema;
 		}
+
+		this.schema = schema;
+
+		return schema;
 	}
 
 }

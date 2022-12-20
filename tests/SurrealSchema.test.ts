@@ -49,6 +49,36 @@ describe("SurrealSchema", () => {
 		const schema = getInstance();
 		const info   = await schema.getSchema();
 
+		const table = info.tables.account;
+
+		expect(table).toBeDefined();
+
+		expect(table.fields.account_type.isString()).toBeTruthy();
+		expect(table.fields["account_type"].isString()).toBeTruthy();
+		expect(table.fields["has_split_account"].isBool()).toBeTruthy();
+		expect(table.fields["username"].isString()).toBeTruthy();
+
+		expect(table.fields["other"].isArray()).toBeTruthy();
+		expect(table.fields["other[*]"].isArrayChild).toBeTruthy();
+		expect(table.fields["other[*].name"].isString()).toBeTruthy();
+
+		expect(table.fields["profiles"].isArray()).toBeTruthy();
+		expect(table.fields["profiles[*]"].isArrayChild).toBeTruthy();
+		expect(table.fields["profiles[*]"].isRecord()).toBeTruthy();
+		expect(table.fields["profiles[*]"].isRecord("profile")).toBeTruthy();
+
+		expect(table.fields["subThing"].isObject()).toBeTruthy();
+		expect(table.fields["subThing.data"].isObject()).toBeTruthy();
+		expect(table.fields["subThing.data.key"].isObject()).toBeTruthy();
+		expect(table.fields["subThing.data.key.value"].isString()).toBeTruthy();
+
+
+	});
+
+	it("can run type checks for field types", async () => {
+		const schema = getInstance();
+		const info   = await schema.getSchema();
+
 		expect(info).toBeDefined();
 		expect(info.tables.account).toBeDefined();
 		expect(info.tables.profile).toBeDefined();

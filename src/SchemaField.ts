@@ -1,4 +1,5 @@
 import {toTitleCase} from "./Utils";
+import {DatabaseFieldTypes} from "./DatabaseTypes";
 
 interface ISchemaField {
 	originalString: string;
@@ -11,8 +12,33 @@ interface ISchemaField {
 	children: SchemaField[];
 	isArrayChild: boolean;
 	isObjectPath: boolean;
+	value: string;
+	permissions: string;
 	finalize(): void;
 	hasChildren(): boolean;
+
+	isAny(): boolean;
+	isArray(): boolean;
+	isBool(): boolean;
+	isDatetime(): boolean;
+	isDecimal(): boolean;
+	isDuration(): boolean;
+	isFloat(): boolean;
+	isInt(): boolean;
+	isNumber(): boolean;
+	isObject(): boolean;
+	isString(): boolean;
+
+	isRecord(recordType: string[]): boolean;
+	isRecord(recordType: string): boolean;
+	isRecord(): boolean;
+	isRecord(recordType?: string | string[]): boolean;
+
+	getRecordType(): string[] | undefined;
+	isGeometry(): boolean;
+	hasAssertStatement(): boolean;
+	hasValueStatement(): boolean;
+	hasPermissionsStatement(): boolean;
 }
 
 export class SchemaField implements ISchemaField {
@@ -26,7 +52,20 @@ export class SchemaField implements ISchemaField {
 	public type: string;
 
 	public record: string;
+
+	/**
+	 * Schema `VALUE` statement
+	 */
+	public value: string;
+	/**
+	 * Schema `ASSERT` statement
+	 */
 	public assert: string;
+
+	/**
+	 * Schema `PERMISSIONS` statement
+	 */
+	public permissions: string;
 
 	public children: SchemaField[] = [];
 
@@ -64,5 +103,102 @@ export class SchemaField implements ISchemaField {
 
 		return field;
 	}
+
+	public isAny(): boolean {
+		return this.type === DatabaseFieldTypes.ANY;
+	}
+
+	public isArray(): boolean {
+		return this.type === DatabaseFieldTypes.ARRAY;
+	}
+
+	public isBool(): boolean {
+		return this.type === DatabaseFieldTypes.BOOL;
+	}
+
+	public isDatetime(): boolean {
+		return this.type === DatabaseFieldTypes.DATETIME;
+	}
+
+	public isDecimal(): boolean {
+		return this.type === DatabaseFieldTypes.DECIMAL;
+	}
+
+	public isDuration(): boolean {
+		return this.type === DatabaseFieldTypes.DURATION;
+	}
+
+	public isFloat(): boolean {
+		return this.type === DatabaseFieldTypes.FLOAT;
+	}
+
+	public isInt(): boolean {
+		return this.type === DatabaseFieldTypes.INT;
+	}
+
+	public isNumber(): boolean {
+		return this.type === DatabaseFieldTypes.NUMBER;
+	}
+
+	public isObject(): boolean {
+		return this.type === DatabaseFieldTypes.OBJECT;
+	}
+
+	public isString(): boolean {
+		return this.type === DatabaseFieldTypes.STRING;
+	}
+
+	public isRecord(recordType: string[]): boolean;
+	public isRecord(recordType: string): boolean;
+	public isRecord(): boolean;
+	public isRecord(recordType?: string | string[]): boolean {
+		const isRecordType = this.type.includes("record");
+		if (!isRecordType) {
+			return false;
+		}
+
+		if (recordType) {
+			const types = this.getRecordType();
+			if (!types) return false;
+
+			if (typeof recordType === "string") {
+				return types.includes(recordType);
+			} else {
+				return recordType.every(type => types.includes(type));
+			}
+		}
+
+		return true;
+	}
+
+	public getRecordType(): string[] | undefined {
+		if (!this.type.includes("record")) return undefined;
+
+		// type = 'record(TYPE)' or 'record(TYPE1, TYPE2, TYPE3...)'
+
+		const type       = this.type;
+		const start      = type.indexOf("(");
+		const end        = type.indexOf(")");
+		const recordType = type.substring(start + 1, end);
+
+		return recordType.split(",");
+	}
+
+	public isGeometry(): boolean {
+		return this.type.includes("geometry");
+	}
+
+	public hasAssertStatement(): boolean {
+		return this.assert !== undefined;
+	}
+
+	public hasValueStatement(): boolean {
+		return this.value !== undefined;
+	}
+
+	public hasPermissionsStatement(): boolean {
+		return this.permissions !== undefined;
+	}
+
 
 }

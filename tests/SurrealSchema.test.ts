@@ -19,6 +19,20 @@ describe("SurrealSchema", () => {
 		expect(schema).toBeDefined();
 	});
 
+	it("doesnt fail with an empty db", async () => {
+		const schema = SurrealSchema.init({
+			host      : "http://127.0.0.1:8000",
+			user      : "forge",
+			pass      : "forge",
+			namespace : "forge",
+			database  : "forge",
+		});
+
+		const info = await schema.getSchema();
+
+		expect(info).toBeDefined();
+	});
+
 	it("can get db info", async () => {
 		const schema = getInstance();
 		const info   = await schema.getDbInfo();

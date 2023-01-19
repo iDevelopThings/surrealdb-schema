@@ -11,6 +11,23 @@ export type SurrealDbConfig = {
 	host: string,
 };
 
+export type SurrealErrorResponse = {
+	code: number;
+	details: string;
+	description: string;
+	information: string;
+}
+
+export class SurrealQueryFailureError extends Error {
+	public query: string;
+	public response: SurrealErrorResponse;
+
+	constructor(response: SurrealErrorResponse, query: string) {
+		super("Surreal Query Failed: " + response.description);
+		this.query    = query;
+		this.response = response;
+	}
+}
 
 export class SurrealSchema {
 
@@ -48,6 +65,10 @@ export class SurrealSchema {
 			body    : query,
 		});
 
+		if (response.status !== 200) {
+			throw new SurrealQueryFailureError(await response.json(), query);
+		}
+
 		return await response.json() as RType;
 	}
 
@@ -72,10 +93,19 @@ export class SurrealSchema {
 	}
 
 	public async getSchema(options: GetSchemaConfig = {}): Promise<Schema> {
-		const dbInfo     = await this.getDbInfo();
-		const tablesInfo = await this.getTablesInfo(dbInfo.getTableNames());
 
 		const schema = new Schema();
+
+		const dbInfo = await this.getDbInfo();
+
+		if (!dbInfo.getTableNames()?.length) {
+			this.schema = schema;
+
+			return schema;
+		}
+
+		const tablesInfo = await this.getTablesInfo(dbInfo.getTableNames());
+
 
 		for (let tableName in dbInfo.tables) {
 			schema.tables[tableName] = SchemaParser.parseTable(dbInfo.tables[tableName]);

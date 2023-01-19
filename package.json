@@ -5,13 +5,12 @@
     "name": "iDevelopThings",
     "url": "https://github.com/idevelopthings"
   },
-
   "readme": "readme.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/idevelopthings/surrealdb-schema"
   },
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

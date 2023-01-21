@@ -6,13 +6,15 @@ import {SchemaField} from "./SchemaField";
 export interface TableSchemaInfo {
 	name: string;
 	title: string;
-	schema: JSONSchema7Definition;
-	ref: `#/defs/${string}`;
+	schema: JSONSchema7;
+	ref: `#/definitions/${string}`;
 }
 
 export class JsonSchema {
 
-	public tableSchemas: { [key: string]: TableSchemaInfo } = {};
+	public tablesSchemaInfo: { [key: string]: TableSchemaInfo } = {};
+
+	public tableSchemas: { [key: string]: JSONSchema7 } = {};
 
 	public schema: JSONSchema7 = {};
 
@@ -25,29 +27,37 @@ export class JsonSchema {
 		for (let key in schema.tables) {
 			const table = schema.tables[key];
 
-			this.tableSchemas[key] = {
+			this.tablesSchemaInfo[key] = {
 				name   : table.name,
 				title  : table.title,
 				schema : {},
-				ref    : `#/defs/${table.name}`
+				ref    : `#/definitions/${table.name}`
 			};
 		}
 
 		for (let key in schema.tables) {
 			const table = schema.tables[key];
-			this.processTable(table, this.tableSchemas[key]);
+			this.processTable(table, this.tablesSchemaInfo[key]);
 		}
 
 		const finalSchema: JSONSchema7 = {
-			$schema : "http://json-schema.org/draft-07/schema#",
-			$id     : "/tables",
-			type    : "object",
-			$defs   : {},
+			$schema     : "http://json-schema.org/draft-07/schema#",
+			type        : "object",
+			definitions : {},
 		};
 
 
-		for (let tableSchemasKey in this.tableSchemas) {
-			finalSchema.$defs[tableSchemasKey] = this.tableSchemas[tableSchemasKey].schema;
+		for (let tableSchemasKey in this.tablesSchemaInfo) {
+			finalSchema.definitions[tableSchemasKey] = this.tablesSchemaInfo[tableSchemasKey].schema;
+		}
+
+		for (let tableSchemasKey in this.tablesSchemaInfo) {
+			this.tableSchemas[tableSchemasKey] = {
+				$schema    : "http://json-schema.org/draft-07/schema#",
+				type       : "object",
+				properties : this.tablesSchemaInfo[tableSchemasKey].schema.properties,
+				definitions: finalSchema.definitions,
+			};
 		}
 
 		this.schema = finalSchema;
@@ -55,7 +65,7 @@ export class JsonSchema {
 
 	public processTable(table: SchemaTable, schema: TableSchemaInfo) {
 		schema.schema = {
-			$id        : `/tables/${table.name}`,
+//			$id        : `/tables/${table.name}`,
 			type       : "object",
 			properties : {},
 		};
@@ -80,12 +90,12 @@ export class JsonSchema {
 		};
 
 		if (field.isRecord() && field.record) {
-			if (this.tableSchemas[field.record]?.ref) {
+			if (this.tablesSchemaInfo[field.record]?.ref) {
 				delete def.type;
 				delete def.title;
 				delete def.description;
 
-				def.$ref = this.tableSchemas[field.record].ref;
+				def.$ref = this.tablesSchemaInfo[field.record].ref;
 
 				return def;
 			}
@@ -97,7 +107,7 @@ export class JsonSchema {
 			if (field.isRecord()) {
 				def.description += ` - ${field.record}`;
 				if (field.record) {
-					const ref = this.tableSchemas[field.record].ref;
+					const ref = this.tablesSchemaInfo[field.record].ref;
 					if (ref) {
 						def.anyOf = [
 							{$ref : ref},

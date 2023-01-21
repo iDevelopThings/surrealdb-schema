@@ -19,6 +19,8 @@ describe("JsonSchema", () => {
 		await s.getSchema();
 
 		const schema = await s.getJsonSchema();
+
+		console.log(schema);
 	});
 
 });

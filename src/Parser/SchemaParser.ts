@@ -119,7 +119,6 @@ export class SchemaParser {
 		const fieldParser = new FieldParser(parser.tokens, parser.line, parser.lineTrimmed);
 
 		return fieldParser.parse();
-//		return parser.parseSchemaField();
 	}
 
 	public static parseTable(line: string): SchemaTable {

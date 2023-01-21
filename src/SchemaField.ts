@@ -1,6 +1,8 @@
 import {toTitleCase} from "./Utils";
 import {DatabaseFieldTypes} from "./DatabaseTypes";
 
+import type {JSONSchema7TypeName} from "json-schema";
+
 interface ISchemaField {
 	originalString: string;
 	name: string;
@@ -74,6 +76,14 @@ export class SchemaField implements ISchemaField {
 
 	public finalize() {
 		this.title = toTitleCase(this.name);
+
+		if (this.title.endsWith("[*]")) {
+			this.title = this.title.slice(0, -3);
+		}
+	}
+
+	public get nameNormalized() {
+		return this.name.replace(/\[\*\]/g, "");
 	}
 
 	public hasChildren() {
@@ -201,4 +211,47 @@ export class SchemaField implements ISchemaField {
 	}
 
 
+	public typeToJSONSchema(): JSONSchema7TypeName | JSONSchema7TypeName[] | undefined {
+		if (this.isArray()) {
+			return "array";
+		}
+
+		if (this.isBool()) {
+			return "boolean";
+		}
+
+		if (this.isDatetime()) {
+			return "string";
+		}
+
+		if (this.isDecimal() || this.isFloat() || this.isInt() || this.isNumber()) {
+			return "number";
+		}
+
+		if (this.isDuration()) {
+			return "string";
+		}
+
+		if (this.isObject()) {
+			return "object";
+		}
+
+		if (this.isString()) {
+			return "string";
+		}
+
+		if (this.isRecord()) {
+			return "object";
+		}
+
+		if (this.isGeometry()) {
+			return "object";
+		}
+
+		if (this.isAny()) {
+			return undefined;
+		}
+
+		return this.type as any;
+	}
 }

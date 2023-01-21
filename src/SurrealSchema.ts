@@ -2,6 +2,7 @@ import {DbInfoResponse, DbTableResponse, DbResponseResult, DbInfo, TableInfo} fr
 import {Schema} from "./Schema";
 import {SchemaField} from "./SchemaField";
 import {SchemaParser} from "./Parser/SchemaParser";
+import {JsonSchema} from "./JsonSchema";
 
 export type SurrealDbConfig = {
 	namespace: string;
@@ -127,6 +128,8 @@ export class SurrealSchema {
 		for (let tableName in schema.tables) {
 			const table = schema.tables[tableName];
 
+			const fieldsToRemove = [];
+
 			for (let fieldName in table.fields) {
 				const field = table.fields[fieldName];
 
@@ -137,6 +140,10 @@ export class SurrealSchema {
 
 					if (childField) {
 						field.children.push(childField);
+
+						if (options?.removeArrayChildren) {
+							fieldsToRemove.push(childField.name);
+						}
 					}
 				}
 
@@ -175,9 +182,30 @@ export class SurrealSchema {
 					}
 				}
 			}
+
+			if (fieldsToRemove.length && options?.removeArrayChildren) {
+				for (let fieldToRemove of fieldsToRemove) {
+					delete table.fields[fieldToRemove];
+				}
+			}
 		}
 
 		this.schema = schema;
+
+		return schema;
+	}
+
+	public async getJsonSchema() {
+		const tableSchema = await this.getSchema({
+			generateId                       : true,
+			handleNestedObjects              : true,
+			deleteOriginalNestedObjectFields : true,
+			removeArrayChildren              : true,
+		});
+
+		const schema = new JsonSchema();
+
+		schema.process(tableSchema);
 
 		return schema;
 	}
@@ -196,4 +224,6 @@ export type GetSchemaConfig = {
 	// When paired with the above option, this will delete all of the original fields
 	// Meaning, to find children of an object, you'll have to go through the parent object -> children -> etc
 	deleteOriginalNestedObjectFields?: boolean
+
+	removeArrayChildren?: boolean;
 }

@@ -89,7 +89,7 @@ export class JsonSchema {
 			description : `${field.title} (${field.nameNormalized}) - ${field.type}`
 		};
 
-		if (field.isRecord() && field.record) {
+		if (field.isRecord() && field.record && !field.isArrayChild) {
 			if (this.tablesSchemaInfo[field.record]?.ref) {
 				delete def.type;
 				delete def.title;
@@ -106,6 +106,7 @@ export class JsonSchema {
 
 			if (field.isRecord()) {
 				def.description += ` - ${field.record}`;
+				def.type = ["string", "object"];
 				if (field.record) {
 					const ref = this.tablesSchemaInfo[field.record].ref;
 					if (ref) {
@@ -114,8 +115,6 @@ export class JsonSchema {
 							{type : "string"}
 						];
 					}
-				} else {
-					def.type = ["string", "object"];
 				}
 			}
 		} else if (field.isArray()) {

@@ -38,12 +38,12 @@ export class JsonSchema {
 			this.processTable(table, this.tableSchemas[key]);
 		}
 
-		const finalSchema = {
+		const finalSchema: JSONSchema7 = {
 			$schema : "http://json-schema.org/draft-07/schema#",
 			$id     : "/tables",
 			type    : "object",
-			$defs   : {}
-		} satisfies JSONSchema7;
+			$defs   : {},
+		};
 
 
 		for (let tableSchemasKey in this.tableSchemas) {

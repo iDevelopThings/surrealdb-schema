@@ -64,10 +64,9 @@ export class JsonSchema {
 			const field       = table.fields[fieldsKey];
 			const fieldSchema = this.processField(field);
 			if (fieldSchema) {
-				if (schema.schema.properties[field.nameNormalized]) {
-					console.log(".");
+				if (!schema.schema.properties[field.nameNormalized]) {
+					schema.schema.properties[field.nameNormalized] = fieldSchema;
 				}
-				schema.schema.properties[field.nameNormalized] = fieldSchema;
 			}
 		}
 
@@ -94,6 +93,21 @@ export class JsonSchema {
 
 		if (field.isArrayChild) {
 			def.description += " (array child)";
+
+			if (field.isRecord()) {
+				def.description += ` - ${field.record}`;
+				if (field.record) {
+					const ref = this.tableSchemas[field.record].ref;
+					if (ref) {
+						def.anyOf = [
+							{$ref : ref},
+							{type : "string"}
+						];
+					}
+				} else {
+					def.type = ["string", "object"];
+				}
+			}
 		} else if (field.isArray()) {
 			def.type            = "array";
 			def.additionalItems = true;
